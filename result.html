@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Natijalar va o‘rinlar</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+	<div class="w-full max-w-5xl bg-white shadow-lg rounded-xl p-6">
+
+		<!-- User Info -->
+		<div class="mb-6 text-gray-800">
+			<h2>👤 Profilingiz</h2>
+			<p><b>Ism:</b> <span id="name"></span></p>
+			<p><b>Telefon:</b> <span id="phone"></span></p>
+			<p><b>Referal ball:</b> <span id="ref"></span></p>
+			<p><b>Test ball:</b> <span id="test"></span></p>
+		</div>
+
+		<!-- Buttons -->
+		<div class="flex gap-3 mb-6">
+			<button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">Referal bo‘yicha</button>
+			<button class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg">Test bo‘yicha</button>
+		</div>
+
+		<!-- Table -->
+		<h2 class="text-xl font-bold mb-4">Natijalar va o‘rinlar</h2>
+
+		<div class="overflow-x-auto">
+			<table class="min-w-full border border-gray-200 rounded-lg text-sm">
+				<thead class="bg-gray-100">
+					<tr>
+						<th class="px-4 py-2 border">№</th>
+						<th class="px-4 py-2 border">Ism</th>
+						<th class="px-4 py-2 border">Referal ball</th>
+						<th class="px-4 py-2 border">Sarflangan vaqt</th>
+					</tr>
+				</thead>
+				<tbody class="text-gray-700">
+					<tr>
+						<td class="px-4 py-2 border">1</td>
+						<td class="px-4 py-2 border">Savrinoz Mamajonova</td>
+						<td class="px-4 py-2 border">640</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr class="bg-gray-50">
+						<td class="px-4 py-2 border">2</td>
+						<td class="px-4 py-2 border">Axmedova Jasmina</td>
+						<td class="px-4 py-2 border">386</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr>
+						<td class="px-4 py-2 border">3</td>
+						<td class="px-4 py-2 border">Ozodbek Yigitaliyev Davronbek o‘g‘li</td>
+						<td class="px-4 py-2 border">375</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr class="bg-gray-50">
+						<td class="px-4 py-2 border">4</td>
+						<td class="px-4 py-2 border">Axrorbek Ashuraliyev</td>
+						<td class="px-4 py-2 border">313</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr>
+						<td class="px-4 py-2 border">5</td>
+						<td class="px-4 py-2 border">Kamoliddinov Farruxjon</td>
+						<td class="px-4 py-2 border">226</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr class="bg-gray-50">
+						<td class="px-4 py-2 border">6</td>
+						<td class="px-4 py-2 border">Azizbek Safarboyev</td>
+						<td class="px-4 py-2 border">177</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr>
+						<td class="px-4 py-2 border">7</td>
+						<td class="px-4 py-2 border">Jo‘rayeva Adiba Shavkat qizi</td>
+						<td class="px-4 py-2 border">162</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr class="bg-gray-50">
+						<td class="px-4 py-2 border">8</td>
+						<td class="px-4 py-2 border">Olimjonova Gulzoda Ximaydulla qizi</td>
+						<td class="px-4 py-2 border">143</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr>
+						<td class="px-4 py-2 border">9</td>
+						<td class="px-4 py-2 border">Shamsiyeva Laylo</td>
+						<td class="px-4 py-2 border">125</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+					<tr class="bg-gray-50">
+						<td class="px-4 py-2 border">10</td>
+						<td class="px-4 py-2 border">Ravshanova Nozima</td>
+						<td class="px-4 py-2 border">124</td>
+						<td class="px-4 py-2 border">-</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+	</div>
+ <script>
+    const tg = window.Telegram.WebApp;
+    const userId = tg.initDataUnsafe.user.id;
+
+    fetch(`https://yourdomain.com/user/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("name").innerText = "Ro‘yxatdan o‘tmagan";
+        } else {
+          document.getElementById("name").innerText = data.full_name;
+          document.getElementById("phone").innerText = data.phone;
+          document.getElementById("ref").innerText = data.ref;
+          document.getElementById("test").innerText = data.test;
+        }
+      });
+  </script>
+</body>
+
+</html>
