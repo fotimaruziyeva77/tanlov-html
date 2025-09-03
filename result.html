@@ -111,7 +111,7 @@
     const tg = window.Telegram.WebApp;
     const userId = tg.initDataUnsafe.user.id;
 
-    fetch(`https://yourdomain.com/user/${userId}`)
+    fetch(`https://tanlovhtml.netlify.app/result.html?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) {
