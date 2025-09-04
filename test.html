@@ -125,21 +125,35 @@
 				explanation: "Tailwind — utility-first uslubidagi CSS framework."
 			},
 			{
-				question: "HTML nima uchun ishlatiladi?",
-				answers: ["Ma'lumotlarni saqlash", "Veb sahifalarni tuzish", "Dastur yozish", "Serverni boshqarish"],
-				correct: 1,
+				text: "HTML nima uchun ishlatiladi?",
+				options: [
+					"Ma'lumotlarni saqlash",
+					"Veb sahifalarni tuzish",
+					"Dastur yozish",
+					"Serverni boshqarish"
+				],
+				correctIndex: 1,
+				explanation: "HTML — veb sahifalarni tuzish uchun ishlatiladi."
 			},
 			{
-				question: "CSS nimani anglatadi?",
-				answers: ["Computer Style Sheets", "Cascading Style Sheets", "Creative Style System", "Colorful Style Syntax"],
-				correct: 1,
+				text: "CSS nimani anglatadi?",
+				options: [
+					"Computer Style Sheets",
+					"Cascading Style Sheets",
+					"Creative Style System",
+					"Colorful Style Syntax"
+				],
+				correctIndex: 1,
+				explanation: "CSS — Cascading Style Sheets degani."
 			},
 			{
-				question: "JavaScript qayerda ishlaydi?",
-				answers: ["Brauzerda", "Server xonasida", "Faqat mobil qurilmada", "SQL bazada"],
-				correct: 0,
-			},
+				text: "JavaScript qayerda ishlaydi?",
+				options: ["Brauzerda", "Server xonasida", "Faqat mobil qurilmada", "SQL bazada"],
+				correctIndex: 0,
+				explanation: "JavaScript asosan brauzerda ishlaydi."
+			}
 		]
+
 
 		let current = 0
 		let selected = Array(questions.length).fill(null)
