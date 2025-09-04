@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Natijalar va o‘rinlar</title>
 	<script src="https://cdn.tailwindcss.com"></script>
-	 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+	<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -107,23 +107,29 @@
 			</table>
 		</div>
 	</div>
- <script>
-    const tg = window.Telegram.WebApp;
-    const userId = tg.initDataUnsafe.user.id;
+	<script>
+		const tg = window.Telegram.WebApp
+		const userId = tg.initDataUnsafe.user.id
 
-    fetch(`https://feff48366cb5.ngrok-free.app/profile/${telegram_id}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          document.getElementById("name").innerText = "Ro‘yxatdan o‘tmagan";
-        } else {
-          document.getElementById("name").innerText = data.full_name;
-          document.getElementById("phone").innerText = data.phone;
-          document.getElementById("ref").innerText = data.ref;
-          document.getElementById("test").innerText = data.test;
-        }
-      });
-  </script>
+		fetch(`https://817b05cbc695.ngrok-free.app/profile/${userId}`)
+			.then(res => {
+				if (!res.ok) throw new Error("User not found")
+				return res.json()
+			})
+			.then(data => {
+				document.getElementById("name").innerText = data.full_name || "Ism mavjud emas"
+				document.getElementById("phone").innerText = data.phone || "-"
+				document.getElementById("ref").innerText = data.referrals || 0
+				document.getElementById("test").innerText = data.test_score || 0
+			})
+			.catch(err => {
+				document.getElementById("name").innerText = "Ro‘yxatdan o‘tmagan"
+				document.getElementById("phone").innerText = "-"
+				document.getElementById("ref").innerText = "-"
+				document.getElementById("test").innerText = "-"
+			});
+
+	</script>
 </body>
 
 </html>
