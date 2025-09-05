@@ -27,6 +27,14 @@
             font-weight: bold;
             transform: scale(1.05);
         }
+        .blink {
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -76,7 +84,15 @@
         </div>
         
         <div id="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4 hidden">
-            Ma'lumotlarni yuklashda xatolik yuz berdi. Iltimos, keyinroq urunib ko'ring.
+            <p class="font-bold">Xatolik yuz berdi</p>
+            <p>Ma'lumotlarni yuklashda xatolik yuz berdi. Iltimos, keyinroq urunib ko'ring.</p>
+            <p class="mt-2 text-sm" id="errorDetails"></p>
+        </div>
+
+        <div id="retrySection" class="mt-4 text-center hidden">
+            <button id="retryButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 blink">
+                Qayta urinish
+            </button>
         </div>
     </div>
 
@@ -100,6 +116,7 @@
             // Set up button event listeners
             document.getElementById('refBtn').addEventListener('click', () => sortLeaderboard('ref'));
             document.getElementById('testBtn').addEventListener('click', () => sortLeaderboard('test'));
+            document.getElementById('retryButton').addEventListener('click', retryFetching);
             
             // Fetch initial data
             fetchUserData();
@@ -123,13 +140,22 @@
         async function fetchUserData() {
             try {
                 // Backenddan foydalanuvchi ma'lumotlarini olish
-                const response = await fetch(`${backendUrl}/profile/${tg.initDataUnsafe.user.id}`, {
+                const response = await fetch(`${backendUrl}/profile`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `tma ${tg.initData}` // Telegram initData-ni yuborish
                     }
                 });
+                
+                // Check if response is HTML instead of JSON (common error with wrong URLs)
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') === -1) {
+                    const text = await response.text();
+                    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+                        throw new Error('Server HTML qaytarmoqda. URL noto‘g‘ri yoki serverda xatolik.');
+                    }
+                }
                 
                 if (!response.ok) {
                     throw new Error(`Server xatosi: ${response.status}`);
@@ -138,10 +164,10 @@
                 const userData = await response.json();
                 
                 // Update UI with user data
-                document.getElementById('name').textContent = userData.full_name || "Ma'lumot yo'q";
+                document.getElementById('name').textContent = userData.name || "Ma'lumot yo'q";
                 document.getElementById('phone').textContent = userData.phone || "Ma'lumot yo'q";
-                document.getElementById('ref').textContent = userData.referrals || 0;
-                document.getElementById('test').textContent = userData.test || 0;
+                document.getElementById('ref').textContent = userData.ref_score || 0;
+                document.getElementById('test').textContent = userData.test_score || 0;
                 
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -149,6 +175,11 @@
                 document.getElementById('phone').textContent = "Xatolik";
                 document.getElementById('ref').textContent = "Xatolik";
                 document.getElementById('test').textContent = "Xatolik";
+                
+                // Show error details
+                document.getElementById('errorDetails').textContent = error.message;
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('retrySection').classList.remove('hidden');
             }
         }
         
@@ -159,6 +190,7 @@
                 document.getElementById('loadingIndicator').classList.remove('hidden');
                 document.getElementById('tableContainer').classList.add('hidden');
                 document.getElementById('errorMessage').classList.add('hidden');
+                document.getElementById('retrySection').classList.add('hidden');
                 
                 // Backenddan reyting jadvalini olish
                 const response = await fetch(`${backendUrl}/leaderboard`, {
@@ -168,6 +200,15 @@
                         'Authorization': `tma ${tg.initData}` // Telegram initData-ni yuborish
                     }
                 });
+                
+                // Check if response is HTML instead of JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') === -1) {
+                    const text = await response.text();
+                    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+                        throw new Error('Server HTML qaytarmoqda. URL noto‘g‘ri yoki serverda xatolik.');
+                    }
+                }
                 
                 if (!response.ok) {
                     throw new Error(`Server xatosi: ${response.status}`);
@@ -214,10 +255,20 @@
                 console.error('Error fetching leaderboard data:', error);
                 document.getElementById('loadingIndicator').classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorDetails').textContent = error.message;
+                document.getElementById('retrySection').classList.remove('hidden');
                 
                 // Agar serverga ulanishda muammo bo'lsa, mock ma'lumotlarni ko'rsatish
                 useMockData();
             }
+        }
+        
+        // Qayta urinish funktsiyasi
+        function retryFetching() {
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('retrySection').classList.add('hidden');
+            fetchUserData();
+            fetchLeaderboardData();
         }
         
         // Agar serverga ulanish imkoni bo'lmasa, mock ma'lumotlardan foydalanish
@@ -254,6 +305,12 @@
             // Hide loading indicator and show table
             document.getElementById('loadingIndicator').classList.add('hidden');
             document.getElementById('tableContainer').classList.remove('hidden');
+            
+            // Show info message about using mock data
+            document.getElementById('errorDetails').textContent = "Serverga ulanishda muammo. Namuna ma'lumotlar ko'rsatilmoqda.";
+            document.getElementById('errorMessage').classList.remove('hidden');
+            document.getElementById('errorMessage').classList.remove('bg-red-100');
+            document.getElementById('errorMessage').classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
         }
         
         // Sort leaderboard by specified criteria
