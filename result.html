@@ -138,10 +138,10 @@
                 const userData = await response.json();
                 
                 // Update UI with user data
-                document.getElementById('name').textContent = userData.name || "Ma'lumot yo'q";
+                document.getElementById('name').textContent = userData.full_name || "Ma'lumot yo'q";
                 document.getElementById('phone').textContent = userData.phone || "Ma'lumot yo'q";
-                document.getElementById('ref').textContent = userData.ref_score || 0;
-                document.getElementById('test').textContent = userData.test_score || 0;
+                document.getElementById('ref').textContent = userData.referals || 0;
+                document.getElementById('test').textContent = userData.test || 0;
                 
             } catch (error) {
                 console.error('Error fetching user data:', error);
