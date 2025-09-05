@@ -23,6 +23,10 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .active-btn {
+            font-weight: bold;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -38,7 +42,7 @@
 
         <!-- Buttons -->
         <div class="flex gap-3 mb-6">
-            <button id="refBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center">
+            <button id="refBtn" class="px-4 py-2 bg-blue-700 text-white rounded-lg flex items-center justify-center active-btn">
                 Referal bo‘yicha
             </button>
             <button id="testBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center">
@@ -50,8 +54,8 @@
         <h2 class="text-xl font-bold mb-4">Natijalar va o‘rinlar</h2>
         
         <div id="loadingIndicator" class="text-center py-4">
-            <div class="loading mx-auto"></div>
-            <p class="mt-2">Ma'lumotlar yuklanmoqda...</p>
+            <div class="loading mx-auto" style="border-top-color: #3b82f6;"></div>
+            <p class="mt-2 text-gray-600">Ma'lumotlar yuklanmoqda...</p>
         </div>
 
         <div id="tableContainer" class="overflow-x-auto hidden">
@@ -86,6 +90,7 @@
         let userData = null;
         let currentSort = 'ref'; // Default sort by referral
         let leaderboardData = [];
+        const backendUrl = 'https://e0e59e1a81d4.ngrok-free.app'; // Sizning ngrok URL
         
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
@@ -103,34 +108,40 @@
         
         // Initialize Telegram WebApp
         function initTelegramWebApp() {
-            // You can use tg.initData or tg.initDataUnsafe to get user data
-            console.log('Telegram WebApp initialized', tg);
+            // Telegram initData-ni olish
+            const initData = tg.initData;
+            console.log('Telegram WebApp initialized', tg, initData);
+            
+            // Agar foydalanuvchi ma'lumotlari mavjud bo'lsa
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const telegramUser = tg.initDataUnsafe.user;
+                console.log('Telegram user:', telegramUser);
+            }
         }
         
         // Fetch user data from backend
         async function fetchUserData() {
             try {
-                // In a real app, you would fetch from your FastAPI backend
-                // For demo purposes, we'll use mock data
+                // Backenddan foydalanuvchi ma'lumotlarini olish
+                const response = await fetch(`${backendUrl}/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `tma ${tg.initData}` // Telegram initData-ni yuborish
+                    }
+                });
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (!response.ok) {
+                    throw new Error(`Server xatosi: ${response.status}`);
+                }
                 
-                // Mock user data - replace with actual API call
-                const mockUserData = {
-                    name: "Foydalanuvchi Ismi",
-                    phone: "+998 90 123 45 67",
-                    ref: 150,
-                    test: 85
-                };
-                
-                userData = mockUserData;
+                const userData = await response.json();
                 
                 // Update UI with user data
-                document.getElementById('name').textContent = userData.name;
-                document.getElementById('phone').textContent = userData.phone;
-                document.getElementById('ref').textContent = userData.ref;
-                document.getElementById('test').textContent = userData.test;
+                document.getElementById('name').textContent = userData.name || "Ma'lumot yo'q";
+                document.getElementById('phone').textContent = userData.phone || "Ma'lumot yo'q";
+                document.getElementById('ref').textContent = userData.ref_score || 0;
+                document.getElementById('test').textContent = userData.test_score || 0;
                 
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -149,29 +160,48 @@
                 document.getElementById('tableContainer').classList.add('hidden');
                 document.getElementById('errorMessage').classList.add('hidden');
                 
-                // In a real app, you would fetch from your FastAPI backend
-                // For demo purposes, we'll use mock data
+                // Backenddan reyting jadvalini olish
+                const response = await fetch(`${backendUrl}/leaderboard`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `tma ${tg.initData}` // Telegram initData-ni yuborish
+                    }
+                });
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                if (!response.ok) {
+                    throw new Error(`Server xatosi: ${response.status}`);
+                }
                 
-                // Mock leaderboard data - replace with actual API call
-                const mockLeaderboardData = [
-                    { id: 1, name: "Savrinoz Mamajonova", ref: 640, test: 92, time: "-", isCurrentUser: false },
-                    { id: 2, name: "Axmedova Jasmina", ref: 386, test: 88, time: "-", isCurrentUser: false },
-                    { id: 3, name: "Ozodbek Yigitaliyev Davronbek o‘g‘li", ref: 375, test: 85, time: "-", isCurrentUser: false },
-                    { id: 4, name: "Axrorbek Ashuraliyev", ref: 313, test: 80, time: "-", isCurrentUser: false },
-                    { id: 5, name: "Kamoliddinov Farruxjon", ref: 226, test: 78, time: "-", isCurrentUser: false },
-                    { id: 6, name: "Azizbek Safarboyev", ref: 177, test: 76, time: "-", isCurrentUser: false },
-                    { id: 7, name: "Jo‘rayeva Adiba Shavkat qizi", ref: 162, test: 75, time: "-", isCurrentUser: false },
-                    { id: 8, name: "Olimjonova Gulzoda Ximaydulla qizi", ref: 143, test: 72, time: "-", isCurrentUser: false },
-                    { id: 9, name: "Shamsiyeva Laylo", ref: 125, test: 70, time: "-", isCurrentUser: false },
-                    { id: 10, name: "Ravshanova Nozima", ref: 124, test: 68, time: "-", isCurrentUser: false },
-                    // Add current user if not in top 10
-                    { id: 15, name: "Foydalanuvchi Ismi", ref: 150, test: 85, time: "-", isCurrentUser: true }
-                ];
+                const data = await response.json();
                 
-                leaderboardData = mockLeaderboardData;
+                leaderboardData = data.leaderboard || [];
+                const currentUserId = data.current_user_id || null;
+                
+                // Joriy foydalanuvchini belgilash
+                leaderboardData = leaderboardData.map(user => ({
+                    ...user,
+                    isCurrentUser: user.id === currentUserId
+                }));
+                
+                // Agar joriy foydalanuvchi ro'yxatda bo'lmasa, qo'shamiz
+                if (currentUserId && !leaderboardData.find(user => user.id === currentUserId)) {
+                    const currentUserResponse = await fetch(`${backendUrl}/profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `tma ${tg.initData}`
+                        }
+                    });
+                    
+                    if (currentUserResponse.ok) {
+                        const currentUser = await currentUserResponse.json();
+                        leaderboardData.push({
+                            ...currentUser,
+                            isCurrentUser: true
+                        });
+                    }
+                }
                 
                 // Sort and display data
                 sortLeaderboard(currentSort);
@@ -184,7 +214,46 @@
                 console.error('Error fetching leaderboard data:', error);
                 document.getElementById('loadingIndicator').classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
+                
+                // Agar serverga ulanishda muammo bo'lsa, mock ma'lumotlarni ko'rsatish
+                useMockData();
             }
+        }
+        
+        // Agar serverga ulanish imkoni bo'lmasa, mock ma'lumotlardan foydalanish
+        function useMockData() {
+            // Mock leaderboard data - faqat serverga ulanish imkoni bo'lmasa ishlatiladi
+            const mockLeaderboardData = [
+                { id: 1, name: "Savrinoz Mamajonova", ref: 640, test: 92, time: "-", isCurrentUser: false },
+                { id: 2, name: "Axmedova Jasmina", ref: 386, test: 88, time: "-", isCurrentUser: false },
+                { id: 3, name: "Ozodbek Yigitaliyev Davronbek o‘g‘li", ref: 375, test: 85, time: "-", isCurrentUser: false },
+                { id: 4, name: "Axrorbek Ashuraliyev", ref: 313, test: 80, time: "-", isCurrentUser: false },
+                { id: 5, name: "Kamoliddinov Farruxjon", ref: 226, test: 78, time: "-", isCurrentUser: false },
+                { id: 6, name: "Azizbek Safarboyev", ref: 177, test: 76, time: "-", isCurrentUser: false },
+                { id: 7, name: "Jo‘rayeva Adiba Shavkat qizi", ref: 162, test: 75, time: "-", isCurrentUser: false },
+                { id: 8, name: "Olimjonova Gulzoda Ximaydulla qizi", ref: 143, test: 72, time: "-", isCurrentUser: false },
+                { id: 9, name: "Shamsiyeva Laylo", ref: 125, test: 70, time: "-", isCurrentUser: false },
+                { id: 10, name: "Ravshanova Nozima", ref: 124, test: 68, time: "-", isCurrentUser: false }
+            ];
+            
+            leaderboardData = mockLeaderboardData;
+            
+            // Joriy foydalanuvchini qo'shish
+            leaderboardData.push({ 
+                id: 15, 
+                name: "Foydalanuvchi Ismi", 
+                ref: 150, 
+                test: 85, 
+                time: "-", 
+                isCurrentUser: true 
+            });
+            
+            // Sort and display data
+            sortLeaderboard(currentSort);
+            
+            // Hide loading indicator and show table
+            document.getElementById('loadingIndicator').classList.add('hidden');
+            document.getElementById('tableContainer').classList.remove('hidden');
         }
         
         // Sort leaderboard by specified criteria
@@ -193,12 +262,14 @@
             
             // Update button styles to show active sort
             if (criteria === 'ref') {
-                document.getElementById('refBtn').classList.add('bg-blue-700');
-                document.getElementById('testBtn').classList.remove('bg-green-700');
+                document.getElementById('refBtn').classList.remove('bg-blue-500');
+                document.getElementById('refBtn').classList.add('bg-blue-700', 'active-btn');
+                document.getElementById('testBtn').classList.remove('bg-green-700', 'active-btn');
                 document.getElementById('testBtn').classList.add('bg-green-500');
             } else {
-                document.getElementById('testBtn').classList.add('bg-green-700');
-                document.getElementById('refBtn').classList.remove('bg-blue-700');
+                document.getElementById('testBtn').classList.remove('bg-green-500');
+                document.getElementById('testBtn').classList.add('bg-green-700', 'active-btn');
+                document.getElementById('refBtn').classList.remove('bg-blue-700', 'active-btn');
                 document.getElementById('refBtn').classList.add('bg-blue-500');
             }
             
@@ -231,9 +302,6 @@
                     row.classList.add('bg-gray-50');
                 }
                 
-                // Determine what value to show based on sort criteria
-                const value = sortCriteria === 'ref' ? item.ref : item.test;
-                
                 row.innerHTML = `
                     <td class="px-4 py-2 border">${index + 1}</td>
                     <td class="px-4 py-2 border">${item.name}</td>
@@ -244,29 +312,6 @@
                 
                 tableBody.appendChild(row);
             });
-        }
-        
-        // Function to send data to backend (example)
-        async function sendDataToBackend(data) {
-            try {
-                // In a real app, you would use fetch to send data to your FastAPI backend
-                const response = await fetch('https://e0e59e1a81d4.ngrok-free.app', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error sending data to backend:', error);
-                throw error;
-            }
         }
     </script>
 </body>
