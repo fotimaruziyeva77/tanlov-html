@@ -140,7 +140,7 @@
         async function fetchUserData() {
             try {
                 // Backenddan foydalanuvchi ma'lumotlarini olish
-                const response = await fetch(`${backendUrl}/profile`, {
+                const response = await fetch(`${backendUrl}/profile/${tg.initData}/`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
