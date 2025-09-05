@@ -110,8 +110,7 @@
 	<script>
 		const tg = window.Telegram.WebApp
 		const userId = tg.initDataUnsafe.user.id
-
-		fetch(`https://817b05cbc695.ngrok-free.app/profile/${userId}`)
+		fetch(`https://e0e59e1a81d4.ngrok-free.app/profile/${userId}`)
 			.then(res => {
 				if (!res.ok) throw new Error("User not found")
 				return res.json()
